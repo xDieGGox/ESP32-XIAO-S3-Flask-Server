@@ -4,7 +4,6 @@
      <meta charset="UTF-8">
      <meta http-equiv="X-UA-Compatible" content="IE=edge">
      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-     <title>Videostreaming</title>
      <style>
           .container{
                margin: 0;
@@ -15,10 +14,19 @@
                color: black;
                text-align: center;
           }
+          .containerHeader{
+               display: flex;
+               flex-direction: column;
+               align-items: center;
+          }
      </style>
+     <title>Videostreaming ESP32-CAM</title>
 </head>
 <body class = "container">
-     <h1>Video en directo</h1>
-     <img src="{{ url_for('video_feed') }}">
+     <div class="containerHeader">
+          <h1>Video Streaming</h1>
+          <img src="{{ url_for('static', filename='Header.webp') }}" alt="Image header" width="50%">
+     </div>
+     <img src="{{ url_for('video_stream') }}">
 </body>
 </html>
