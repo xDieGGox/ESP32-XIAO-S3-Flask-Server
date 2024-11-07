@@ -5,7 +5,7 @@
      <meta http-equiv="X-UA-Compatible" content="IE=edge">
      <meta name="viewport" content="width=device-width, initial-scale=1.0">
      <style>
-          .container{
+          .container {
                margin: 0;
                padding: 0;
                width: 100%;
@@ -14,19 +14,346 @@
                color: black;
                text-align: center;
           }
-          .containerHeader{
+          .containerHeader {
                display: flex;
                flex-direction: column;
                align-items: center;
           }
+          ul {
+               list-style: none;
+               padding: 0;
+          }
+          li {
+               display: inline;
+               margin: 0 10px;
+          }
+          a {
+               color: black;
+               text-decoration: none;
+               position: relative;
+               padding-bottom: 3px;
+               transition: color 0.3s ease;
+          }
+          a:hover {
+               color: #db9711;
+          }
+          a::after {
+               content: "";
+               position: absolute;
+               width: 100%;
+               height: 2px;
+               background-color: #db9711;
+               left: 0;
+               bottom: 0;
+               transform: scaleX(0);
+               transform-origin: bottom right;
+               transition: transform 0.3s ease;
+          }
+          a:hover::after {
+               transform: scaleX(1);
+               transform-origin: bottom left;
+          }
+          
+          .botones {
+               color: #db9711;
+          }
+          
+          /* Oculta la barra deslizadora inicialmente */
+          #sliderContainer {
+               display: none;
+               margin-top: 20px;
+          }
+          .labels {
+               display: flex;
+               justify-content: center;
+               margin-bottom: 10px;
+               width: 55%; /* Esto hará que los labels ocupen el mismo ancho que la imagen */
+               margin: 0 auto;
+           }
+           
+          .labels label {
+               flex: 1;
+               text-align: center;
+               display: none;
+           }
+           
+          #videoStream {
+               display: inline-block;
+               margin: 0 auto;
+               text-align: center;
+           }
+           .videoContainer {
+               width: 100%;
+               text-align: center;
+          }
+          /* Estilos para los informes */
+
+          #informe1, #informe2 {
+               display: none;
+               font-family: Arial, sans-serif;
+               color: #333;
+               }
+
+               .informe {
+               margin: 20px;
+               padding: 20px;
+               border: 1px solid #ddd;
+               border-radius: 5px;
+               background-color: #f9f9f9;
+               }
+
+               .informe p {
+               text-align: justify;
+               line-height: 1.6;
+               margin-bottom: 15px;
+               }
+
+               .informe strong {
+               font-weight: bold;
+               color: #555;
+               }
+
+               .informe ul {
+               padding-left: 20px;
+               margin-bottom: 15px;
+               }
+
+               .informe ul li {
+               text-align: justify;
+               line-height: 1.6;
+               list-style-type: disc;
+               margin-bottom: 5px;
+               }
+
+               .informe a {
+               color: #007bff;
+               text-decoration: none;
+               }
+
+               .informe a:hover {
+               text-decoration: underline;
+               }
+
+
+
      </style>
      <title>Videostreaming ESP32-CAM</title>
 </head>
-<body class = "container">
+<body class="container">
+     <div class="">
+          <p><strong>PRACTICA 2</strong></p>
+          <ul>
+               <li><p><strong>Integrantes:</strong></p> Diego Loja - Jorge Lituma</li>
+               <li><p><strong>Fecha: </strong> 07 de noviembre de 2024</p></li>
+          </ul>
+     </div>
+     <div>
+          <h3>Parte 1</h3>
+          <ul>
+              <li><a class="botones" onclick="changeStream('/video_stream1', true)">Cámaras Parte 1</a></li>
+              <li><a class="botones" onclick="mostrarInforme1()">Informe Parte 1</a></li>
+              <!--
+              <li><a class="botones" onclick="changeStream('/video_stream6')">Clahe</a></li>
+              <li><a class="botones" onclick="changeStream('/video_stream7')">Equalización del histograma</a></li>
+               <li><a class="botones" onclick="changeStream('/video_stream3')">Escala de Grises</a></li>
+              <li><a class="botones" onclick="changeStream('/video_stream4')">Método Investigado (Gamma Correction)</a></li>
+              <li><a class="botones" onclick="changeStream('/video_stream5')">Colores</a></li>
+              <li><a class="botones" onclick="changeStream('/video_stream8', true)">Ruido de sal y pimienta</a></li>
+               -->
+          </ul>
+      </div>
+      
+      <div>
+          <h3>Parte 2</h3>
+          <ul>
+               <li><a class="botones" onclick="mostrarInforme2()">Informe Parte 2</a></li>
+               <li><a class="botones" onclick="changeStream('/video_stream9')">Erosión</a></li>
+               <li><a class="botones" onclick="changeStream('/video_stream10')">Dilatación</a></li>
+               <li><a class="botones" onclick="changeStream('/video_stream11')">Top Hat</a></li>
+               <li><a class="botones" onclick="changeStream('/video_stream12')">Black Hat</a></li>
+               <li><a class="botones" onclick="changeStream('/video_stream13')">Imagen original + (Top Hat - Black Hat)</a></li>
+               <li><a class="botones" onclick="changeStream('/video_stream14')">Todo</a></li>
+          </ul>
+      </div>
      <div class="containerHeader">
           <h1>Video Streaming</h1>
-          <img src="{{ url_for('static', filename='Header.webp') }}" alt="Image header" width="50%">
+          <img id="headerImage" src="{{ url_for('static', filename='Header.webp') }}" alt="" width="45%">
      </div>
-     <img src="{{ url_for('video_stream') }}">
+     
+     <!-- Contenedor de video -->
+     <div class="videoContainer">
+          <div class="labels" >
+               <label>Original</label>
+               <label>Erosion</label>
+               <label>Dilatacion</label>
+               <label>Top Hat</label>
+               <label>Black Hat</label>
+               <label>Img Original + (Top Hat - Black Hat)</label>
+           </div>
+           
+          <img id="videoStream" src="/video_stream1" alt="Video stream" width="90%">
+     </div>
+
+     <div id="informe1" style="display: none;">
+          <div class="informe">
+               <div>
+                    <p>En el siguiente informe sobre la parte 1 de la Practica 2, se han realizado los siguientes aspectos para poder cumplir con los objetivos.</p>
+                    <p>Parte 1-A</p>
+                    <p><strong>Punto 1:</strong>Se ha creado un fork del repositorio de ejemplo para poder realizar las actividades de las cuales una de ellas era la substracción adaptativa de fondo. 
+                         Por ello se ha creado el siguiente fork, como el trabajo fue realizado en pareja tenemos los siguientes fork realizados los cuales contienen el mismo código al ser grupo.
+                    </p>
+                    <ul>
+                         <li>Fork Diego Loja: <a href="https://github.com/xDieGGox/ESP32-XIAO-S3-Flask-Server.git">https://github.com/xDieGGox/ESP32-XIAO-S3-Flask-Server.git</a></li>
+                         <li>Fork Jorge Lituma: <a href="https://github.com/Chris-Liter/ESP32-XIAO-S3-Flask-Server.git">https://github.com/Chris-Liter/ESP32-XIAO-S3-Flask-Server.git</a></li>
+                    </ul>
+                    <p><strong>Punto 2:</strong> Se ha programado una función para detectar movimiento y para mostrar los FPS en el video original, ademas de otros filtros, los cuales son
+                         visibles en diferentes cuadrantes con su respectivo nombre en la parte superior.
+                         Entonces para la deteccion de movimiento se ha basado en el tutorial sugerido y se ha aplicado la substracción adaptativa de fondo llamado "BackgroundSubtractorMOG2",
+                          este se ha aplicado en la imaen original capturada para poder detectar movimiento, esto se puede ver en el respepctivo cuadrante y se ha utilizado este al ser un método sencillo de
+                          aplicar y de poder extraer el fondo con un "LEARNING RATE" el cual es la velocidad con la que se adapta el modelo creado a los cambios en la imagen.
+                    </p>
+                    <p><strong>Punto 3:</strong> Aqui se han aplicado algunos filtros para mejorar la iluminacion de la imagen los cuales son la ecualización de histograma, el método CLAHE y el método investigado que es el Contrast Stretching, estos filtros los hemos aplicado
+                         a la imagen convertida en escala de grises para poder apreciar de mejor manera su efecto con los diferentes filtros, a continuación se explica la diferencia entre estos.
+                    </p>
+                    <p><strong>Punto 4 (Comparación): </strong> El filtro investigado mejora la iluminacion expandiendo el rango de intensidad, es decir que va mapeando el rango de entrada de la imagen original, y lo transforma a un rango mas amplio, un ejemplo es que si la imagen 
+                         tiene un rango inicial de 100 -150, este lo mejora de 0 a 255, esto permite conservar la imagen original y la relacion entre pixeles teniendo una imagen más uniforme con mas rango. A diferencia de la ecualizacion de histograma en donde se sistribuye uniformemente los niveles de intensidad en la 
+                         imagen pero lo malo es que en algunas zonas exagera el ruido lo que ocasiona defectos en la imagen en las zonas pequeñas. En cambio con CLAHE, este mejora la imagen de forma adaptativa por partes o regiones, esto reduce el ruido y la sobreexposicion que ocasiona la ecualización de histograma; ademas en comparación con el contrast stretching es un poco mas lento al ir mejorando la imagen por regiones y no solo apliando el rango. 
+                    </p>
+                    <p><strong>Punto 5:</strong> Las técnicas de detección de movimiento ya han sido aplicadas en los cuadrantes con su nombre, para estas se han usado como se menciono anteriormente una de las técnicas proporcionadas por el tutorial sugerido que es el BackgroundSubstractorMOG2, pero existia otro que era KNN, el cual tenía un efecto menos prolijo.
+
+                    </p>
+
+               </div>
+               <div>
+                    <p>Parte 1-B</p>
+                    <p>En esta parte se ha utilizado lo hecho en la anterior parte pero ya con las nuevas funciones que son objetivos de esta parte, como principal tema en suavizado de imagen y el ruido de sal y pimienta.</p>
+                    <p><strong>Sal y Pimienta: </strong> Aqui se ha generado en el index unos dos slider para poder ir modificando los parámetros de la sal y pimienta, los cuales son puntos blancos y negros respectivamente, estos slider se conectan con el "backend", a través de una función de javascript la cual envia y actualiza los parámetros para poderlos ver, estos se activan por medio de un botón el cual de igual manera se ve en pantalla.
+                         Asi enviamos los datos a variables globales, actualizamos y aplicamos en la funcion video_capture para mostrar los cambios, los cuales en caso de ambos se ubican en parametros aleatorios cada vez y en toda la imagen. Esto lo podemos ver en el cuadrante respectivo.
+                    </p>
+                    <p><strong>Suavizado: </strong> Ahora con la imagen con sal y pimienta, debemos aplicar filtros de suavizado, los cuales en la práctica nos piden de la mediana, blur y gaussiano, de los cuales al igual que con los parámetros anteriores son enviados el tamaño de máscara desde el index por un método de javascript, se recibe su tamaño y se aplica en la función definida, la cual nos aplica a los tres la misma máscara, para poder ver los cambios,
+                         esto se observa en los cuadrantes respectivos al aplicar sal y pimienta y como es "eliminado" por los filtros de suavizado, en algunos más que en otros. A esta función se le envian los parametros de la imagen con ruido de sal y pimienta y el tamaño de máscara.
+                    </p>
+                    <p><strong>Deteccion de bordes: </strong> Para la deteccion de bordes se utilizo los métodos de Sobel y Canny, para cada uno se ve en los cuadrantes de el efecto aplicado sin suavizado y suavizando la imagen, esto con la ayuda del método copyTo() de opencv. Así, se aplican el sobel y canny con los parámetros iguales asi vemos la comparación, en Sobel se especifica CV_16S para que el gradiente que pueden tener valores negativos, para luego transformalos a valores absolutos, el ksize es el tamaño de mascara el cuál lo hemos dejado con 3 ya que es lo más común para detectar bordes finos, el resto es para calcular el gradiente horizontal y vertical, y al mismo se le aplica el suavizado.
+                         En cambio con Canny, se ajustan los valores de umbrales, el umbral inferior y el superior, asi entre los dos se verifica que es un borde y que no. asi si es mayor al umbral superior entonces se marca como borde y si es inferior al umbral inferios no se marca.
+
+                    </p>
+               </div>
+          </div>
+     </div>
+     <div id="informe2" style="display: none;">
+          <div class="informe">
+               <h1>Informe de Análisis de Radiografías</h1>
+   
+               <p><span class="highlight"><strong>Primera Fila (Máscara 37x37):</strong></span> La erosión y dilatación son bastante intensas, lo cual simplifica considerablemente los detalles finos. La erosión casi elimina detalles internos, mientras que la dilatación produce áreas con pocos bordes definidos. La combinación de Top Hat y Black Hat muestra contornos visibles, pero pierde claridad en los detalles.</p>
+               <p><span class="highlight"><strong>Segunda Fila (Máscara 25x25):</strong></span> Menos intensa que la primera fila, mantiene más detalles estructurales. Los efectos de Top Hat y Black Hat resaltan bien las formas principales, conservando detalles críticos. La imagen combinada es más detallada y conserva bordes de intensidad media.</p>
+               <p><span class="highlight"><strong>Tercera Fila (Máscara 30x30):</strong></span> Los resultados se encuentran entre los de la primera y segunda fila en cuanto a suavidad y detalle. La imagen combinada resalta detalles con un balance entre claridad y contraste.</p>
+               
+               <p><span class="highlight"><strong>Erosión:</strong></span> Reduce ruido y detalles finos, simplificando la imagen pero eliminando bordes cruciales, afectando la nitidez.</p>
+               <p><span class="highlight"><strong>Dilatación:</strong></span> Expande regiones brillantes, resaltando áreas de interés amplias pero difuminando detalles finos.</p>
+               <p><span class="highlight"><strong>Top Hat:</strong></span> Destaca objetos claros, útil para identificar detalles en regiones de interés.</p>
+               <p><span class="highlight"><strong>Black Hat:</strong></span> Resalta detalles oscuros en regiones brillantes, útil en imágenes con contraste medio-alto.</p>
+               <p><span class="highlight"><strong>Combinación (Top Hat - Black Hat):</strong></span> Resalta contornos y bordes, ofreciendo un balance de contraste y nitidez en máscaras intermedias.</p>
+
+               <p>Comparando las tres filas, la <span class="highlight">segunda fila (25x25)</span> ofrece el mejor balance entre nitidez y visibilidad de los objetos, permitiendo observar detalles estructurales sin perder información crítica. La <span class="highlight">primera fila (37x37)</span> pierde demasiada información y nitidez, mientras que la <span class="highlight">tercera fila (30x30)</span> ofrece un balance aceptable, aunque no tan detallado como la segunda.</p>
+               <p>Para análisis de radiografías, se recomienda utilizar máscaras de tamaño intermedio, como la de <span class="highlight">25x25</span>, que realzan detalles sin comprometer la nitidez ni simplificar excesivamente los detalles.</p>
+     
+          </div>
+     </div>
+
+     <!-- Contenedor de los controles deslizantes para ruido de sal y pimienta -->
+     <div id="sliderContainer">
+          <label for="salt">Nivel de sal:</label>
+          <input type="range" id="salt" name="salt" min="0" max="30" step="0.5" value="0">
+          <br>
+          <label for="pepper">Nivel de pimienta:</label>
+          <input type="range" id="pepper" name="pepper" min="0" max="30" step="0.5" value="0">
+          <br>
+          <label for="mask">Tamaño de mascara:</label>
+          <input type="range" id="mask" name="mask" min="3" max="20" step="1" value="0">
+          <br>
+          <button id="updateSettings">Actualizar Configuración</button>
+     </div>
+     
+
+     <script>
+          function mostrarInforme1(){
+               const videoStream = document.getElementById('videoStream');
+               const inf1 = document.getElementById('informe1');
+               const inf2 = document.getElementById('informe2');
+               
+               videoStream.style.display = 'none';
+               inf1.style.display = 'block';
+               inf2.style.display = 'none';
+          }
+
+          function mostrarInforme2(){
+               const videoStream = document.getElementById('videoStream');
+               const inf1 = document.getElementById('informe1');
+               const inf2 = document.getElementById('informe2');
+               
+               videoStream.style.display = 'none';
+               inf1.style.display = 'none';
+               inf2.style.display = 'block';
+          }
+
+          async function changeStream(route, showSlider = false) {
+               const videoStream = document.getElementById('videoStream');
+               const sliderContainer = document.getElementById('sliderContainer');
+               const headerImage = document.getElementById('headerImage');
+               const labels = document.querySelectorAll('.labels label'); // Captura los labels
+               const inf1 = document.getElementById('informe1');
+               const inf2 = document.getElementById('informe2');
+
+               // Ocultar o mostrar la barra deslizadora
+               sliderContainer.style.display = showSlider ? 'block' : 'none';
+
+               videoStream.style.display = 'block';
+               inf1.style.display = 'none';
+               inf2.style.display = 'none';
+
+
+               // Detener el stream actual temporalmente
+               videoStream.src = ''; 
+               await new Promise(resolve => setTimeout(resolve, 500));
+
+               // Asignar la nueva ruta para iniciar el nuevo stream
+               videoStream.src = route;
+
+               // Cambiar el ancho de la imagen en función del tipo de enlace
+               if (['/video_stream9', '/video_stream10', '/video_stream11', '/video_stream12', '/video_stream13'].includes(route)) {
+                    videoStream.style.width = '75%';
+                    labels.forEach(label => label.style.display = "none"); // Mostrar labels
+               }else if(['/video_stream14'].includes(route)){
+                    videoStream.style.width = '55%';
+                    labels.forEach(label => label.style.display = "flex"); // Mostrar labels
+
+               } 
+               else {
+                    labels.forEach(label => label.style.display = "none"); // Mostrar labels
+                    videoStream.style.width = '90%';
+               }
+          }
+
+
+          document.getElementById('updateSettings').addEventListener('click', function() {
+               const saltLevel = document.getElementById('salt').value;
+               const pepperLevel = document.getElementById('pepper').value;
+               const maskSize = document.getElementById('mask').value;
+
+               // Enviar los valores a tu servidor (ajusta la URL según sea necesario)
+               fetch('/update-settings', {
+                    method: 'POST',
+                    headers: {
+                         'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ saltLevel, pepperLevel, maskSize }),
+               });
+          });
+
+     </script>
+     
+     
 </body>
+
+
 </html>
